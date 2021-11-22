@@ -8,22 +8,16 @@ const gui = new dat.GUI()
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
+var animation = null
+
 const loader = new FBXLoader()
 loader.load("dance.fbx", (mesh) => {
-    mesh.scale.set(10,10,10)
+    mesh.scale.set(0.0005, 0.0005, 0.0005)
     scene.add(mesh)
+    animation = new THREE.AnimationMixer(mesh)
+    const dancing = animation.clipAction(mesh.animations[0])
+    dancing.play()
 })
-
-const geometry = new THREE.TorusGeometry(.7, .2, 16, 100);
-
-// Materials
-
-const material = new THREE.MeshBasicMaterial()
-material.color = new THREE.Color(0xff0000)
-
-// Mesh
-const sphere = new THREE.Mesh(geometry, material)
-scene.add(sphere)
 
 const pointLight = new THREE.PointLight(0xffffff, 1)
 pointLight.position.x = 2
@@ -47,7 +41,7 @@ window.addEventListener('resize', () => {
 
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 0
-camera.position.y = 0
+camera.position.y = 3
 camera.position.z = 2
 scene.add(camera)
 
@@ -70,6 +64,11 @@ const tick = () => {
     renderer.render(scene, camera)
     controls.update()
     window.requestAnimationFrame(tick)
+
+    const delta = clock.getDelta()
+    if (animation) {
+        animation.update(delta * 20)
+    }
 }
 
 tick()
